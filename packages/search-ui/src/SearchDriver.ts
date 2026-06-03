@@ -310,16 +310,14 @@ class SearchDriver {
       })
     };
 
-    return Promise.resolve(
-      this.events.autocomplete({ searchTerm }, queryConfig)
-    )
-      .then((autocompleted) => {
+    return this.events.autocomplete({ searchTerm }, queryConfig).then(
+      (autocompleted) => {
         if (this.autocompleteRequestSequencer.isOldRequest(requestId)) return;
         this.autocompleteRequestSequencer.completed(requestId);
 
         this._setState(autocompleted);
-      })
-      .catch((error) => {
+      },
+      (error) => {
         if (this.debug) {
           console.error(error);
         }
@@ -334,7 +332,8 @@ class SearchDriver {
         this._setState({
           error: `An unexpected error occurred: ${error.message}`
         });
-      });
+      }
+    );
   };
 
   /**
