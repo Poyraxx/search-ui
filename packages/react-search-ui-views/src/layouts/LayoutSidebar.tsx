@@ -9,15 +9,26 @@ interface LayoutSidebarProps {
 
 interface LayoutSidebarState {
   isSidebarToggled: boolean;
+  hasSidebarContent: boolean;
 }
 
 class LayoutSidebar extends React.Component<
   LayoutSidebarProps,
   LayoutSidebarState
 > {
+  private sidebarRef = React.createRef<HTMLDivElement>();
+
   constructor(props) {
     super(props);
-    this.state = { isSidebarToggled: false };
+    this.state = { isSidebarToggled: false, hasSidebarContent: false };
+  }
+
+  componentDidMount() {
+    this.syncSidebarContentState();
+  }
+
+  componentDidUpdate() {
+    this.syncSidebarContentState();
   }
 
   toggleSidebar = () => {
@@ -26,8 +37,44 @@ class LayoutSidebar extends React.Component<
     }));
   };
 
+  syncSidebarContentState = () => {
+    const sidebar = this.sidebarRef.current;
+    const hasSidebarContent = Array.from(sidebar?.childNodes ?? [])
+      .filter((node) => {
+        return !(
+          node instanceof HTMLButtonElement &&
+          node.classList.contains("sui-layout-sidebar-toggle")
+        );
+      })
+      .some((node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          return Boolean(node.textContent?.trim());
+        }
+
+        if (!(node instanceof HTMLElement)) return false;
+
+        return (
+          Boolean(node.textContent?.trim()) ||
+          node.matches("input,select,textarea,button,a") ||
+          Boolean(node.querySelector("input,select,textarea,button,a"))
+        );
+      });
+
+    if (
+      hasSidebarContent !== this.state.hasSidebarContent ||
+      (!hasSidebarContent && this.state.isSidebarToggled)
+    ) {
+      this.setState({
+        hasSidebarContent,
+        isSidebarToggled: hasSidebarContent
+          ? this.state.isSidebarToggled
+          : false
+      });
+    }
+  };
+
   renderToggleButton = (label) => {
-    if (!this.props.children) return null;
+    if (!this.state.hasSidebarContent) return null;
 
     return (
       <button
@@ -53,7 +100,7 @@ class LayoutSidebar extends React.Component<
     return (
       <>
         {this.renderToggleButton("Show Filters")}
-        <div className={classes}>
+        <div className={classes} ref={this.sidebarRef}>
           {this.renderToggleButton("Save Filters")}
           {children}
         </div>

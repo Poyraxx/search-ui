@@ -378,6 +378,30 @@ describe("autocompleteQuery config", () => {
       search_fields
     );
   });
+
+  it("will store autocomplete errors in state", async () => {
+    const mockApiConnector = getMockApiConnector();
+    (mockApiConnector.onAutocomplete as jest.Mock).mockRejectedValue(
+      new Error("Failed to fetch")
+    );
+
+    const driver = new SearchDriver({
+      apiConnector: mockApiConnector,
+      trackUrlState: false
+    });
+
+    driver.setSearchTerm("test", {
+      autocompleteResults: true,
+      refresh: false
+    });
+    jest.runAllTimers();
+    await Promise.resolve();
+    await waitATick();
+
+    expect(driver.getState().error).toEqual(
+      "An unexpected error occurred: Failed to fetch"
+    );
+  });
 });
 
 describe("#getState", () => {

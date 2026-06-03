@@ -37,3 +37,14 @@ it("updates isSidebarToggled state on button click", () => {
   fireEvent.click(toggleButton);
   expect(sidebar).not.toHaveClass("sui-layout-sidebar--toggled");
 });
+
+it("does not render toggle buttons when sidebar content is empty", () => {
+  render(
+    <LayoutSidebar className="sui-layout-sidebar">
+      <div />
+    </LayoutSidebar>
+  );
+
+  expect(screen.queryByText("Show Filters")).not.toBeInTheDocument();
+  expect(screen.queryByText("Save Filters")).not.toBeInTheDocument();
+});

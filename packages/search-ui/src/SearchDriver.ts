@@ -310,13 +310,30 @@ class SearchDriver {
       })
     };
 
-    return this.events
-      .autocomplete({ searchTerm }, queryConfig)
+    return Promise.resolve(
+      this.events.autocomplete({ searchTerm }, queryConfig)
+    )
       .then((autocompleted) => {
         if (this.autocompleteRequestSequencer.isOldRequest(requestId)) return;
         this.autocompleteRequestSequencer.completed(requestId);
 
         this._setState(autocompleted);
+      })
+      .catch((error) => {
+        if (this.debug) {
+          console.error(error);
+        }
+
+        if (error.message === INVALID_CREDENTIALS) {
+          this._setState({
+            ...(this.apiConnector?.state && { ...this.apiConnector.state })
+          });
+          return;
+        }
+
+        this._setState({
+          error: `An unexpected error occurred: ${error.message}`
+        });
       });
   };
 

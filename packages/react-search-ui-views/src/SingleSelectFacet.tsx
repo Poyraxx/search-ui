@@ -69,7 +69,7 @@ function SingleSelectFacet({
             return Option(props);
           }
         }}
-        value={selectedSelectBoxOption}
+        value={selectedSelectBoxOption ?? null}
         onChange={(o) => onChange(o.value)}
         options={selectBoxOptions}
         isSearchable={false}

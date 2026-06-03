@@ -99,6 +99,25 @@ describe("determining selected option", () => {
       container.querySelector(".sui-select__placeholder")
     ).toHaveTextContent("Select...");
   });
+
+  it("will clear the selected value after it is removed", () => {
+    const { container, rerender } = render(<SingleSelectFacet {...params} />);
+
+    rerender(
+      <SingleSelectFacet
+        {...params}
+        options={params.options.map((option) => ({
+          ...option,
+          selected: false
+        }))}
+      />
+    );
+
+    expect(container.querySelector(".sui-select__single-value")).toBeNull();
+    expect(
+      container.querySelector(".sui-select__placeholder")
+    ).toHaveTextContent("Select...");
+  });
 });
 
 it("renders with className prop applied", () => {
